@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Football Draft Order Tracker</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .lucide { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Lucide icons as SVG components
+        const Trophy = ({ size = 24, className = "" }) => (
+            <svg className={`lucide ${className}`} width={size} height={size} viewBox="0 0 24 24">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                <path d="M4 22h16"/>
+                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+            </svg>
+        );
+
+        const Users = ({ size = 24, className = "" }) => (
+            <svg className={`lucide ${className}`} width={size} height={size} viewBox="0 0 24 24">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+        );
+
+        const Target = ({ size = 24, className = "" }) => (
+            <svg className={`lucide ${className}`} width={size} height={size} viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="6"/>
+                <circle cx="12" cy="12" r="2"/>
+            </svg>
+        );
+
+        const games = [
+            { id: 1, matchup: "KSU/Iowa St", favorite: "KSU", spread: 1.5 },
+            { id: 2, matchup: "Texas/Ohio St", favorite: "OSU", spread: -1.5 },
+            { id: 3, matchup: "LSU/Clemson", favorite: "Clemson", spread: -4 },
+            { id: 4, matchup: "Notre Dame/Miami", favorite: "ND", spread: -2.5 },
+            { id: 5, matchup: "VT/South Carolina", favorite: "SC", spread: -8 },
+            { id: 6, matchup: "Alabama/Florida St", favorite: "Bama", spread: -13.5 },
+            { id: 7, matchup: "Boise St/South Florida", favorite: "Boise", spread: -6.5 },
+            { id: 8, matchup: "Auburn/Baylor", favorite: "Auburn", spread: -2.5 },
+            { id: 9, matchup: "Utah/UCLA", favorite: "Utah", spread: -6 },
+            { id: 10, matchup: "Syracuse/Tennessee", favorite: "UT", spread: -13.5 },
+            { id: 11, matchup: "Stanford/Hawaii", favorite: "Hawaii", spread: -2.5, tiebreaker: "TB1" },
+            { id: 12, matchup: "Nebraska/Cincinnati", favorite: "Nebraska", spread: -6.5, tiebreaker: "TB2" },
+            { id: 13, matchup: "Georgia Tech/Colorado", favorite: "GT", spread: -4, tiebreaker: "TB3" }
+        ];
+
+        function CFBSpreadTracker() {
+            const [players, setPlayers] = useState(['']);
+            const [picks, setPicks] = useState({});
+            const [results, setResults] = useState({});
+
+            const addPlayer = () => {
+                setPlayers([...players, '']);
+            };
+
+            const updatePlayer = (index, name) => {
+                const newPlayers = [...players];
+                newPlayers[index] = name;
+                setPlayers(newPlayers);
+            };
+
+            const removePlayer = (index) => {
+                const newPlayers = players.filter((_, i) => i !== index);
+                setPlayers(newPlayers);
+                const newPicks = { ...picks };
+                delete newPicks[players[index]];
+                setPicks(newPicks);
+            };
+
+            const updatePick = (playerName, gameId, pick) => {
+                setPicks(prev => ({
+                    ...prev,
+                    [playerName]: {
+                        ...prev[playerName],
+                        [gameId]: pick
+                    }
+                }));
+            };
+
+            const updateResult = (gameId, winner) => {
+                setResults(prev => ({
+                    ...prev,
+                    [gameId]: winner
+                }));
+            };
+
+            const calculateScores = () => {
+                const scores = {};
+                players.forEach(player => {
+                    if (!player.trim()) return;
+                    let correct = 0;
+                    games.forEach(game => {
+                        const playerPick = picks[player]?.[game.id];
+                        const gameResult = results[game.id];
+                        if (playerPick && gameResult && playerPick === gameResult) {
+                            correct++;
+                        }
+                    });
+                    scores[player] = correct;
+                });
+                return scores;
+            };
+
+            const getTeamOptions = (matchup) => {
+                const teams = matchup.split('/');
+                return teams;
+            };
+
+            const scores = calculateScores();
+            const sortedPlayers = Object.entries(scores)
+                .sort(([,a], [,b]) => b - a)
+                .map(([player]) => player);
+
+            return (
+                <div className="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center gap-3 mb-6">
+                            <Trophy size={32} className="text-yellow-500" />
+                            <h1 className="text-3xl font-bold text-gray-800">Fantasy Football Draft Order Tracker</h1>
+                        </div>
+                        
+                        <div className="mb-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <Users size={24} className="text-blue-500" />
+                                <h2 className="text-xl font-semibold">Players</h2>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+                                {players.map((player, index) => (
+                                    <div key={index} className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder={`Player ${index + 1}`}
+                                            value={player}
+                                            onChange={(e) => updatePlayer(index, e.target.value)}
+                                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                        {players.length > 1 && (
+                                            <button
+                                                onClick={() => removePlayer(index)}
+                                                className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                                            >
+                                                ✕
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                            <button
+                                onClick={addPlayer}
+                                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                            >
+                                Add Player
+                            </button>
+                        </div>
+
+                        <div className="mb-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <Target size={24} className="text-green-500" />
+                                <h2 className="text-xl font-semibold">Games & Picks</h2>
+                            </div>
+                            
+                            <div className="overflow-x-auto">
+                                <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow">
+                                    <thead>
+                                        <tr className="bg-gray-100">
+                                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">Game</th>
+                                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">Spread</th>
+                                            {players.filter(p => p.trim()).map(player => (
+                                                <th key={player} className="border border-gray-300 px-4 py-3 text-center font-semibold min-w-32">
+                                                    {player}
+                                                </th>
+                                            ))}
+                                            <th className="border border-gray-300 px-4 py-3 text-center font-semibold">Result</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {games.map(game => {
+                                            const teams = getTeamOptions(game.matchup);
+                                            return (
+                                                <tr key={game.id} className="hover:bg-gray-50">
+                                                    <td className="border border-gray-300 px-4 py-3">
+                                                        <div className="font-medium">{game.matchup}</div>
+                                                        {game.tiebreaker && (
+                                                            <div className="text-sm text-blue-600 font-semibold">{game.tiebreaker}</div>
+                                                        )}
+                                                    </td>
+                                                    <td className="border border-gray-300 px-4 py-3">
+                                                        <span className="font-medium">{game.favorite} {game.spread}</span>
+                                                    </td>
+                                                    {players.filter(p => p.trim()).map(player => (
+                                                        <td key={player} className="border border-gray-300 px-4 py-3 text-center">
+                                                            <select
+                                                                value={picks[player]?.[game.id] || ''}
+                                                                onChange={(e) => updatePick(player, game.id, e.target.value)}
+                                                                className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                            >
+                                                                <option value="">Pick</option>
+                                                                {teams.map(team => (
+                                                                    <option key={team} value={team}>{team}</option>
+                                                                ))}
+                                                            </select>
+                                                        </td>
+                                                    ))}
+                                                    <td className="border border-gray-300 px-4 py-3 text-center">
+                                                        <select
+                                                            value={results[game.id] || ''}
+                                                            onChange={(e) => updateResult(game.id, e.target.value)}
+                                                            className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                                        >
+                                                            <option value="">TBD</option>
+                                                            {teams.map(team => (
+                                                                <option key={team} value={team}>{team}</option>
+                                                            ))}
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
+                            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                                <Trophy size={24} className="text-yellow-500" />
+                                Draft Order (Best Record Picks First)
+                            </h2>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h3 className="font-semibold mb-3 text-gray-700">Current Standings</h3>
+                                    <div className="space-y-2">
+                                        {sortedPlayers.map((player, index) => (
+                                            <div key={player} className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-800 font-bold rounded-full text-sm">
+                                                        {index + 1}
+                                                    </span>
+                                                    <span className="font-medium">{player}</span>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="font-bold text-lg">{scores[player] || 0}</div>
+                                                    <div className="text-sm text-gray-500">correct</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h3 className="font-semibold mb-3 text-gray-700">Draft Order</h3>
+                                    <div className="space-y-2">
+                                        {sortedPlayers.map((player, index) => (
+                                            <div key={player} className="flex items-center gap-3 bg-white p-3 rounded-lg shadow-sm">
+                                                <div className={`flex items-center justify-center w-8 h-8 font-bold rounded-full text-sm ${
+                                                    index === 0 ? 'bg-yellow-100 text-yellow-800' :
+                                                    index === 1 ? 'bg-gray-100 text-gray-800' :
+                                                    index === 2 ? 'bg-orange-100 text-orange-800' :
+                                                    'bg-blue-100 text-blue-800'
+                                                }`}>
+                                                    {index + 1}
+                                                </div>
+                                                <span className="font-medium">{player}</span>
+                                                <span className="ml-auto text-sm text-gray-500">
+                                                    Pick #{index + 1}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<CFBSpreadTracker />, document.getElementById('root'));
+    </script>
+</body>
+</html>
