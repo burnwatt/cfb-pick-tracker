@@ -1,318 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fantasy Football Draft Order Tracker</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>Burnwatt Football</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-gradient-to-br from-blue-50 to-purple-100 min-h-screen">
+    <div class="container mx-auto px-6 py-16">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="mb-8">
+                <h1 class="text-6xl font-bold text-gray-800 mb-4">
+                    🏈 Burnwatt Football
+                </h1>
+                <p class="text-xl text-gray-600 mb-8">
+                    Fantasy football tools and trackers for our league
+                </p>
+            </div>
 
-<body>
-    <div id="root"></div>
-
-    <script type="text/babel">
-        const { useState } = React;
-
-        const games = [
-            { id: 1, matchup: "KSU/Iowa St", favorite: "KSU", spread: 1.5 },
-            { id: 2, matchup: "Texas/Ohio St", favorite: "OSU", spread: -1.5 },
-            { id: 3, matchup: "LSU/Clemson", favorite: "Clemson", spread: -4 },
-            { id: 4, matchup: "Notre Dame/Miami", favorite: "ND", spread: -2.5 },
-            { id: 5, matchup: "VT/South Carolina", favorite: "SC", spread: -8 },
-            { id: 6, matchup: "Alabama/Florida St", favorite: "Bama", spread: -13.5 },
-            { id: 7, matchup: "Boise St/South Florida", favorite: "Boise", spread: -6.5 },
-            { id: 8, matchup: "Auburn/Baylor", favorite: "Auburn", spread: -2.5 },
-            { id: 9, matchup: "Utah/UCLA", favorite: "Utah", spread: -6 },
-            { id: 10, matchup: "Syracuse/Tennessee", favorite: "UT", spread: -13.5 },
-            { id: 11, matchup: "Stanford/Hawaii", favorite: "Hawaii", spread: -2.5, tiebreaker: "TB1" },
-            { id: 12, matchup: "Nebraska/Cincinnati", favorite: "Nebraska", spread: -6.5, tiebreaker: "TB2" },
-            { id: 13, matchup: "Georgia Tech/Colorado", favorite: "GT", spread: -4, tiebreaker: "TB3" }
-        ];
-
-        // UPDATE RESULTS HERE AS GAMES FINISH
-        const gameResults = {
-            // Main Games (1-10)
-            // 1: "KSU",
-            1: "Iowa St",
-
-            // 2: "Texas",
-            // 2: "Ohio St",
-
-            // 3: "LSU",
-            // 3: "Clemson",
-
-            // 4: "Notre Dame",
-            // 4: "Miami",
-
-            // 5: "VT",
-            // 5: "South Carolina",
-
-            // 6: "Alabama",
-            // 6: "Florida St",
-
-            // 7: "Boise St",
-            7: "South Florida",
-
-            // 8: "Auburn",
-            // 8: "Baylor",
-
-            // 9: "Utah",
-            // 9: "UCLA",
-
-            // 10: "Syracuse",
-            // 10: "Tennessee",
-
-            // Tiebreaker Games (11-13)
-            // 11: "Stanford",
-            11: "Hawaii",
-
-            // 12: "Nebraska",
-            // 12: "Cincinnati",
-
-            // 13: "Georgia Tech",
-            // 13: "Colorado",
-        };
-
-        const picks = {
-            "Kevin": {
-                1: "KSU", 2: "Texas", 3: "Clemson", 4: "Notre Dame", 5: "South Carolina",
-                6: "Alabama", 7: "Boise St", 8: "Auburn", 9: "Utah", 10: "Tennessee",
-                11: "Hawaii", 12: "Nebraska", 13: "Georgia Tech"
-            },
-            "Brandon": {
-                1: "KSU", 2: "Texas", 3: "Clemson", 4: "Miami", 5: "South Carolina",
-                6: "Alabama", 7: "Boise St", 8: "Baylor", 9: "Utah", 10: "Tennessee",
-                11: "Hawaii", 12: "Nebraska", 13: "Georgia Tech"
-            },
-            "Geoff": {
-                1: "Iowa St", 2: "Texas", 3: "Clemson", 4: "Notre Dame", 5: "South Carolina",
-                6: "Alabama", 7: "Boise St", 8: "Auburn", 9: "UCLA", 10: "Tennessee",
-                11: "Hawaii", 12: "Nebraska", 13: "Colorado"
-            },
-            "Kent": {
-                1: "KSU", 2: "Texas", 3: "LSU", 4: "Miami", 5: "South Carolina",
-                6: "Florida St", 7: "South Florida", 8: "Auburn", 9: "Utah", 10: "Tennessee",
-                11: "Stanford", 12: "Nebraska", 13: "Georgia Tech"
-            },
-            "Wilson": {
-                1: "Iowa St", 2: "Ohio St", 3: "LSU", 4: "Notre Dame", 5: "South Carolina",
-                6: "Alabama", 7: "South Florida", 8: "Auburn", 9: "UCLA", 10: "Tennessee",
-                11: "Hawaii", 12: "Nebraska", 13: "Georgia Tech"
-            },
-            "Scott": {
-                1: "KSU", 2: "Texas", 3: "Clemson", 4: "Notre Dame", 5: "South Carolina",
-                6: "Florida St", 7: "South Florida", 8: "Baylor", 9: "UCLA", 10: "Tennessee",
-                11: "Stanford", 12: "Nebraska", 13: "Colorado"
-            },
-            "Burnwatt": {
-                1: "KSU", 2: "Texas", 3: "Clemson", 4: "Notre Dame", 5: "VT",
-                6: "Florida St", 7: "Boise St", 8: "Baylor", 9: "UCLA", 10: "Syracuse",
-                11: "Stanford", 12: "Nebraska", 13: "Colorado"
-            },
-            "Morgan": {
-                1: "Iowa St", 11: "Stanford"
-            },
-            "Cody": {
-                1: "Iowa St", 2: "Ohio St", 3: "LSU", 4: "Notre Dame", 5: "VT",
-                6: "Alabama", 7: "South Florida", 8: "Baylor", 9: "UCLA", 10: "Tennessee",
-                11: "Hawaii"
-            },
-            "Paul": {
-                1: "Iowa St", 11: "Stanford"
-            }
-        };
-
-        function App() {
-            const [isAdmin, setIsAdmin] = useState(false);
-            const [password, setPassword] = useState('');
-
-            const calculateScores = () => {
-                const scores = {};
-                const tiebreakerScores = {};
-
-                Object.keys(picks).forEach(player => {
-                    let main = 0;
-                    let tb = 0;
-
-                    games.forEach(game => {
-                        const pick = picks[player][game.id];
-                        const result = gameResults[game.id];
-
-                        if (result && pick === result) {
-                            if (game.id <= 10) main++;
-                            else tb++;
-                        }
-                    });
-
-                    scores[player] = main;
-                    tiebreakerScores[player] = tb;
-                });
-
-                return { scores, tiebreakerScores };
-            };
-
-            const { scores, tiebreakerScores } = calculateScores();
-
-            const sortedPlayers = Object.keys(scores).sort((a, b) => {
-                if (scores[a] !== scores[b]) return scores[b] - scores[a];
-                return tiebreakerScores[b] - tiebreakerScores[a];
-            });
-
-            const completedMain = Object.keys(gameResults).filter(id => parseInt(id) <= 10).length;
-            const completedTB = Object.keys(gameResults).filter(id => parseInt(id) > 10).length;
-
-            return (
-                <div className="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
-                    <div className="bg-white rounded-lg shadow-lg p-6">
-                        <div className="flex justify-between items-center mb-6">
-                            <h1 className="text-3xl font-bold text-gray-800">Fantasy Football Draft Order Tracker</h1>
-
-                            {!isAdmin ? (
-                                <div className="flex gap-2">
-                                    <input
-                                        type="password"
-                                        placeholder="Admin password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="px-3 py-2 border rounded"
-                                    />
-                                    <button
-                                        onClick={() => {
-                                            if (password === 'burnwatt2025') {
-                                                setIsAdmin(true);
-                                                setPassword('');
-                                            }
-                                        }}
-                                        className="px-3 py-2 bg-blue-500 text-white rounded"
-                                    >
-                                        Admin
-                                    </button>
-                                </div>
-                            ) : (
-                                <button
-                                    onClick={() => setIsAdmin(false)}
-                                    className="px-3 py-2 bg-red-500 text-white rounded"
-                                >
-                                    Logout
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Progress */}
-                        <div className="grid grid-cols-2 gap-4 mb-6">
-                            <div>
-                                <div className="text-sm text-gray-600 mb-1">Main Games: {completedMain}/10</div>
-                                <div className="bg-gray-200 rounded-full h-3">
-                                    <div className="bg-blue-600 h-3 rounded-full" style={{ width: `${completedMain / 10 * 100}%` }}></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div className="text-sm text-gray-600 mb-1">Tiebreakers: {completedTB}/3</div>
-                                <div className="bg-gray-200 rounded-full h-3">
-                                    <div className="bg-purple-600 h-3 rounded-full" style={{ width: `${completedTB / 3 * 100}%` }}></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Games Table */}
-                        <div className="overflow-x-auto mb-6">
-                            <table className="w-full border-collapse border border-gray-300">
-                                <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="border border-gray-300 p-2 text-left">Game</th>
-                                        <th className="border border-gray-300 p-2 text-left">Spread</th>
-                                        {Object.keys(picks).map(player => (
-                                            <th key={player} className="border border-gray-300 p-2 text-center">{player}</th>
-                                        ))}
-                                        <th className="border border-gray-300 p-2 text-center">Result</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {games.map(game => {
-                                        const result = gameResults[game.id];
-                                        return (
-                                            <tr key={game.id}>
-                                                <td className="border border-gray-300 p-2">
-                                                    <div className="font-medium">{game.matchup}</div>
-                                                    {game.tiebreaker && <div className="text-sm text-blue-600">{game.tiebreaker}</div>}
-                                                </td>
-                                                <td className="border border-gray-300 p-2">{game.favorite} {game.spread}</td>
-                                                {Object.keys(picks).map(player => {
-                                                    const pick = picks[player][game.id];
-                                                    const correct = result && pick === result;
-                                                    const wrong = result && pick && pick !== result;
-                                                    const miss = !pick;
-
-                                                    return (
-                                                        <td key={player} className="border border-gray-300 p-2 text-center">
-                                                            <span className={`px-2 py-1 rounded text-sm ${correct ? 'bg-green-100 text-green-800' :
-                                                                wrong ? 'bg-red-100 text-red-800' :
-                                                                    miss ? 'bg-orange-100 text-orange-800' :
-                                                                        'bg-gray-100 text-gray-700'
-                                                                }`}>
-                                                                {pick || 'MISS'}
-                                                            </span>
-                                                        </td>
-                                                    );
-                                                })}
-                                                <td className="border border-gray-300 p-2 text-center">
-                                                    <span className={`px-2 py-1 rounded text-sm ${result ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'
-                                                        }`}>
-                                                        {result || 'TBD'}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Leaderboard */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <h3 className="text-lg font-semibold mb-3">Current Standings</h3>
-                                {sortedPlayers.map((player, i) => (
-                                    <div key={player} className="flex justify-between items-center bg-gray-50 p-3 rounded mb-2">
-                                        <div className="flex items-center gap-3">
-                                            <span className="w-6 h-6 bg-blue-500 text-white rounded-full text-sm flex items-center justify-center">
-                                                {i + 1}
-                                            </span>
-                                            <span className="font-medium">{player}</span>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="font-bold">
-                                                {scores[player]}
-                                                {tiebreakerScores[player] > 0 && (
-                                                    <span className="text-purple-600 text-sm ml-1">+{tiebreakerScores[player]}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div>
-                                <h3 className="text-lg font-semibold mb-3">Draft Order</h3>
-                                {sortedPlayers.map((player, i) => (
-                                    <div key={player} className="flex justify-between items-center bg-gray-50 p-3 rounded mb-2">
-                                        <span className="font-medium">{player}</span>
-                                        <span className="text-sm text-gray-600">Pick #{i + 1}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <!-- CFB Pick Tracker Card -->
+                <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow p-6">
+                    <div class="text-4xl mb-4">🎯</div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">CFB Pick Tracker</h3>
+                    <p class="text-gray-600 mb-4">Track college football picks for fantasy draft order</p>
+                    <a href="/cfb-pick-tracker/" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        View Tracker
+                    </a>
                 </div>
-            );
-        }
 
-        ReactDOM.render(<App />, document.getElementById('root'));
-    </script>
+                <!-- Coming Soon Cards -->
+                <div class="bg-white rounded-xl shadow-lg p-6 opacity-75">
+                    <div class="text-4xl mb-4">📊</div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">NFL Picks</h3>
+                    <p class="text-gray-600 mb-4">Weekly NFL pick tracking</p>
+                    <span class="inline-block bg-gray-300 text-gray-600 font-medium py-2 px-4 rounded-lg">
+                        Coming Soon
+                    </span>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 opacity-75">
+                    <div class="text-4xl mb-4">🏆</div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">League Stats</h3>
+                    <p class="text-gray-600 mb-4">Historical league performance</p>
+                    <span class="inline-block bg-gray-300 text-gray-600 font-medium py-2 px-4 rounded-lg">
+                        Coming Soon
+                    </span>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center">
+                <p class="text-gray-500">
+                    Built for the Burnwatt Fantasy Football League
+                </p>
+            </div>
+        </div>
+    </div>
 </body>
-
 </html>
