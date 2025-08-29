@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +9,6 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-
 <body>
     <div id="root"></div>
 
@@ -38,41 +36,41 @@
             // Main Games (1-10)
             // 1: "KSU",
             1: "Iowa St",
-
+            
             // 2: "Texas",
             // 2: "Ohio St",
-
+            
             // 3: "LSU",
             // 3: "Clemson",
-
+            
             // 4: "Notre Dame",
             // 4: "Miami",
-
+            
             // 5: "VT",
             // 5: "South Carolina",
-
+            
             // 6: "Alabama",
             // 6: "Florida St",
-
+            
             // 7: "Boise St",
             7: "South Florida",
-
+            
             // 8: "Auburn",
             // 8: "Baylor",
-
+            
             // 9: "Utah",
             // 9: "UCLA",
-
+            
             // 10: "Syracuse",
             // 10: "Tennessee",
-
+            
             // Tiebreaker Games (11-13)
             // 11: "Stanford",
             11: "Hawaii",
-
+            
             // 12: "Nebraska",
             // 12: "Cincinnati",
-
+            
             // 13: "Georgia Tech",
             // 13: "Colorado",
         };
@@ -127,36 +125,35 @@
         };
 
         function App() {
-            const [isAdmin, setIsAdmin] = useState(false);
-            const [password, setPassword] = useState('');
+            const [selectedTab, setSelectedTab] = useState('standings');
 
             const calculateScores = () => {
                 const scores = {};
                 const tiebreakerScores = {};
-
+                
                 Object.keys(picks).forEach(player => {
                     let main = 0;
                     let tb = 0;
-
+                    
                     games.forEach(game => {
                         const pick = picks[player][game.id];
                         const result = gameResults[game.id];
-
+                        
                         if (result && pick === result) {
                             if (game.id <= 10) main++;
                             else tb++;
                         }
                     });
-
+                    
                     scores[player] = main;
                     tiebreakerScores[player] = tb;
                 });
-
+                
                 return { scores, tiebreakerScores };
             };
 
             const { scores, tiebreakerScores } = calculateScores();
-
+            
             const sortedPlayers = Object.keys(scores).sort((a, b) => {
                 if (scores[a] !== scores[b]) return scores[b] - scores[a];
                 return tiebreakerScores[b] - tiebreakerScores[a];
@@ -166,145 +163,163 @@
             const completedTB = Object.keys(gameResults).filter(id => parseInt(id) > 10).length;
 
             return (
-                <div className="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
-                    <div className="bg-white rounded-lg shadow-lg p-6">
-                        <div className="flex justify-between items-center mb-6">
-                            <h1 className="text-3xl font-bold text-gray-800">Fantasy Football Draft Order Tracker</h1>
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-white shadow-sm border-b sticky top-0 z-10">
+                        <div className="px-4 py-4">
+                            <h1 className="text-lg sm:text-2xl font-bold text-gray-800 text-center">
+                                🏈 Draft Order Tracker
+                            </h1>
+                        </div>
+                    </div>
 
-                            {!isAdmin ? (
-                                <div className="flex gap-2">
-                                    <input
-                                        type="password"
-                                        placeholder="Admin password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="px-3 py-2 border rounded"
-                                    />
-                                    <button
-                                        onClick={() => {
-                                            if (password === 'burnwatt2025') {
-                                                setIsAdmin(true);
-                                                setPassword('');
-                                            }
-                                        }}
-                                        className="px-3 py-2 bg-blue-500 text-white rounded"
-                                    >
-                                        Admin
-                                    </button>
+                    <div className="px-4 py-6 max-w-6xl mx-auto">
+                        {/* Progress Bars */}
+                        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+                            <div className="space-y-4">
+                                <div>
+                                    <div className="flex justify-between text-sm text-gray-600 mb-2">
+                                        <span>Main Games (1-10)</span>
+                                        <span className="font-medium">{completedMain}/10</span>
+                                    </div>
+                                    <div className="bg-gray-200 rounded-full h-2">
+                                        <div 
+                                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                            style={{width: `${completedMain/10*100}%`}}
+                                        ></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="flex justify-between text-sm text-gray-600 mb-2">
+                                        <span>Tiebreakers (11-13)</span>
+                                        <span className="font-medium">{completedTB}/3</span>
+                                    </div>
+                                    <div className="bg-gray-200 rounded-full h-2">
+                                        <div 
+                                            className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                                            style={{width: `${completedTB/3*100}%`}}
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Tab Navigation */}
+                        <div className="bg-white rounded-lg shadow-sm mb-6">
+                            <div className="flex border-b">
+                                <button
+                                    onClick={() => setSelectedTab('standings')}
+                                    className={`flex-1 py-3 px-4 text-center font-medium transition-colors ${
+                                        selectedTab === 'standings' 
+                                        ? 'text-blue-600 border-b-2 border-blue-600' 
+                                        : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                                >
+                                    Standings
+                                </button>
+                                <button
+                                    onClick={() => setSelectedTab('games')}
+                                    className={`flex-1 py-3 px-4 text-center font-medium transition-colors ${
+                                        selectedTab === 'games' 
+                                        ? 'text-blue-600 border-b-2 border-blue-600' 
+                                        : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                                >
+                                    Games
+                                </button>
+                            </div>
+
+                            {selectedTab === 'standings' ? (
+                                <div className="p-4">
+                                    <div className="space-y-3">
+                                        {sortedPlayers.map((player, i) => (
+                                            <div key={player} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                <div className="flex items-center space-x-3">
+                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                                                        i === 0 ? 'bg-yellow-100 text-yellow-800' :
+                                                        i === 1 ? 'bg-gray-100 text-gray-800' :
+                                                        i === 2 ? 'bg-orange-100 text-orange-800' :
+                                                        'bg-blue-100 text-blue-800'
+                                                    }`}>
+                                                        {i + 1}
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-medium text-gray-900">{player}</div>
+                                                        <div className="text-sm text-gray-500">Pick #{i + 1}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="font-bold text-lg text-gray-900">
+                                                        {scores[player]}
+                                                        {tiebreakerScores[player] > 0 && (
+                                                            <span className="text-purple-600 text-sm ml-1">
+                                                                +{tiebreakerScores[player]}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-sm text-gray-500">
+                                                        {completedMain > 0 ? `${Math.round((scores[player] / completedMain) * 100)}%` : '0%'}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             ) : (
-                                <button
-                                    onClick={() => setIsAdmin(false)}
-                                    className="px-3 py-2 bg-red-500 text-white rounded"
-                                >
-                                    Logout
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Progress */}
-                        <div className="grid grid-cols-2 gap-4 mb-6">
-                            <div>
-                                <div className="text-sm text-gray-600 mb-1">Main Games: {completedMain}/10</div>
-                                <div className="bg-gray-200 rounded-full h-3">
-                                    <div className="bg-blue-600 h-3 rounded-full" style={{ width: `${completedMain / 10 * 100}%` }}></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div className="text-sm text-gray-600 mb-1">Tiebreakers: {completedTB}/3</div>
-                                <div className="bg-gray-200 rounded-full h-3">
-                                    <div className="bg-purple-600 h-3 rounded-full" style={{ width: `${completedTB / 3 * 100}%` }}></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Games Table */}
-                        <div className="overflow-x-auto mb-6">
-                            <table className="w-full border-collapse border border-gray-300">
-                                <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="border border-gray-300 p-2 text-left">Game</th>
-                                        <th className="border border-gray-300 p-2 text-left">Spread</th>
-                                        {Object.keys(picks).map(player => (
-                                            <th key={player} className="border border-gray-300 p-2 text-center">{player}</th>
-                                        ))}
-                                        <th className="border border-gray-300 p-2 text-center">Result</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {games.map(game => {
-                                        const result = gameResults[game.id];
-                                        return (
-                                            <tr key={game.id}>
-                                                <td className="border border-gray-300 p-2">
-                                                    <div className="font-medium">{game.matchup}</div>
-                                                    {game.tiebreaker && <div className="text-sm text-blue-600">{game.tiebreaker}</div>}
-                                                </td>
-                                                <td className="border border-gray-300 p-2">{game.favorite} {game.spread}</td>
-                                                {Object.keys(picks).map(player => {
-                                                    const pick = picks[player][game.id];
-                                                    const correct = result && pick === result;
-                                                    const wrong = result && pick && pick !== result;
-                                                    const miss = !pick;
-
-                                                    return (
-                                                        <td key={player} className="border border-gray-300 p-2 text-center">
-                                                            <span className={`px-2 py-1 rounded text-sm ${correct ? 'bg-green-100 text-green-800' :
-                                                                wrong ? 'bg-red-100 text-red-800' :
-                                                                    miss ? 'bg-orange-100 text-orange-800' :
-                                                                        'bg-gray-100 text-gray-700'
-                                                                }`}>
-                                                                {pick || 'MISS'}
+                                <div className="p-4">
+                                    <div className="space-y-4">
+                                        {games.map(game => {
+                                            const result = gameResults[game.id];
+                                            return (
+                                                <div key={game.id} className="border border-gray-200 rounded-lg p-4">
+                                                    <div className="flex justify-between items-start mb-3">
+                                                        <div className="flex-1">
+                                                            <div className="font-medium text-gray-900">{game.matchup}</div>
+                                                            <div className="text-sm text-gray-600">{game.favorite} {game.spread}</div>
+                                                            {game.tiebreaker && (
+                                                                <span className="inline-block mt-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                                                                    {game.tiebreaker}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                                                result ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                                                            }`}>
+                                                                {result || 'TBD'}
                                                             </span>
-                                                        </td>
-                                                    );
-                                                })}
-                                                <td className="border border-gray-300 p-2 text-center">
-                                                    <span className={`px-2 py-1 rounded text-sm ${result ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'
-                                                        }`}>
-                                                        {result || 'TBD'}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Leaderboard */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <h3 className="text-lg font-semibold mb-3">Current Standings</h3>
-                                {sortedPlayers.map((player, i) => (
-                                    <div key={player} className="flex justify-between items-center bg-gray-50 p-3 rounded mb-2">
-                                        <div className="flex items-center gap-3">
-                                            <span className="w-6 h-6 bg-blue-500 text-white rounded-full text-sm flex items-center justify-center">
-                                                {i + 1}
-                                            </span>
-                                            <span className="font-medium">{player}</span>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="font-bold">
-                                                {scores[player]}
-                                                {tiebreakerScores[player] > 0 && (
-                                                    <span className="text-purple-600 text-sm ml-1">+{tiebreakerScores[player]}</span>
-                                                )}
-                                            </div>
-                                        </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {/* Mobile-friendly picks grid */}
+                                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+                                                        {Object.keys(picks).map(player => {
+                                                            const pick = picks[player][game.id];
+                                                            const correct = result && pick === result;
+                                                            const wrong = result && pick && pick !== result;
+                                                            const miss = !pick;
+                                                            
+                                                            return (
+                                                                <div key={player} className="text-center">
+                                                                    <div className="text-xs text-gray-600 mb-1">{player}</div>
+                                                                    <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                                                                        correct ? 'bg-green-100 text-green-800' :
+                                                                        wrong ? 'bg-red-100 text-red-800' :
+                                                                        miss ? 'bg-orange-100 text-orange-800' :
+                                                                        'bg-gray-100 text-gray-700'
+                                                                    }`}>
+                                                                        {pick || 'MISS'}
+                                                                    </span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
-                                ))}
-                            </div>
-
-                            <div>
-                                <h3 className="text-lg font-semibold mb-3">Draft Order</h3>
-                                {sortedPlayers.map((player, i) => (
-                                    <div key={player} className="flex justify-between items-center bg-gray-50 p-3 rounded mb-2">
-                                        <span className="font-medium">{player}</span>
-                                        <span className="text-sm text-gray-600">Pick #{i + 1}</span>
-                                    </div>
-                                ))}
-                            </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -314,5 +329,4 @@
         ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
-
 </html>
